@@ -1,5 +1,5 @@
 use std::fs;
-use advent_of_code_rusty_2022_ed::{Elf, Expedition};
+use advent_of_code_rusty_2022_ed::expedition::{Elf, Expedition};
 
 fn main() -> std::io::Result<()> {
     let contents = fs::read_to_string("examples/01/input.txt")?;

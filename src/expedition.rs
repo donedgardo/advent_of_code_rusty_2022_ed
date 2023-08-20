@@ -115,3 +115,28 @@ mod elf_inventory_test
 }
 
 
+#[cfg(test)]
+mod advent_solve_code_test {
+    use std::fs;
+    use crate::expedition::Expedition;
+
+    #[test]
+    fn solves_day_1_example() -> std::io::Result<()> {
+        let contents = fs::read_to_string("examples/01/sample.txt")?;
+        let expedition = Expedition::new(contents.as_str());
+        assert_eq!(expedition.elf_with_most_calories().unwrap().calories_on_inventory(), 24000);
+        Ok(())
+    }
+
+    #[test]
+    fn solves_day_1_example_2() -> std::io::Result<()> {
+        let contents = fs::read_to_string("examples/01/sample.txt")?;
+        let expedition = Expedition::new(contents.as_str());
+        assert_eq!(
+            expedition.top_n_elves_food_calories_total(3),
+            45000);
+        Ok(())
+    }
+}
+
+

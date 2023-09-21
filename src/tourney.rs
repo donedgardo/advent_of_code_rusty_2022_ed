@@ -198,7 +198,7 @@ mod rock_paper_scissor_tourney_test {
 
     #[test]
     fn it_scores_correctly() -> std::io::Result<()> {
-        let saved_snapshot = fs::read_to_string("examples/02/test_snapshots.txt")?;
+        let saved_snapshot = fs::read_to_string("src/bin/02/test_snapshots.txt")?;
         let symbols = ["A", "B", "C"];
         let mut current_snapshot = "".to_owned();
         for symbol1 in symbols.into_iter() {

@@ -1,9 +1,0 @@
-Rock Draws to Rock: Score 4 | 4
-Rock Lost to Paper: Score 1 | 8
-Rock Beats Scissor: Score 7 | 3
-Paper Beats Rock: Score 8 | 1
-Paper Draws to Paper: Score 5 | 5
-Paper Lost to Scissor: Score 2 | 9
-Scissor Lost to Rock: Score 3 | 7
-Scissor Beats Paper: Score 9 | 2
-Scissor Draws to Scissor: Score 6 | 6

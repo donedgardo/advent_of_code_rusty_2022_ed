@@ -3,6 +3,6 @@ pub mod tourney;
 mod rucksack;
 pub mod elves_group;
 pub mod cleaning_elves;
-mod crane;
+pub mod crane;
 
 

@@ -1,19 +1,19 @@
 use crate::crane::parse_error::ParseError;
 
 #[derive(Debug)]
-pub struct CraneCommand {
-    repeat: usize,
-    from: usize,
-    to: usize,
+pub struct CraneMoveCommand {
+    pub repeat: usize,
+    pub from: usize,
+    pub to: usize,
 }
 
-pub fn parse_crane_command(x: &str) -> Result<CraneCommand, ParseError>  {
+pub fn parse_crane_command(x: &str) -> Result<CraneMoveCommand, ParseError>  {
     if x.is_empty() {
         return Err(ParseError::Empty);
     }
     let x_split: Vec<&str> = x.split(" ").collect();
     if let (Ok(repeat), Ok(from), Ok(to)) = (x_split[1].parse::<usize>(), x_split[3].parse::<usize>(), x_split[5].parse::<usize>()) {
-        Ok(CraneCommand {
+        Ok(CraneMoveCommand {
             repeat,
             from,
             to,
@@ -23,9 +23,9 @@ pub fn parse_crane_command(x: &str) -> Result<CraneCommand, ParseError>  {
     }
 }
 
-pub fn parse_crane_commands(input: &str) -> Result<Vec<CraneCommand>, ParseError> {
+pub fn parse_crane_commands(input: &str) -> Result<Vec<CraneMoveCommand>, ParseError> {
     let command_lines: Vec<&str> = input.split("\n").collect();
-    let mut commands: Vec<CraneCommand> = Vec::with_capacity(command_lines.len());
+    let mut commands: Vec<CraneMoveCommand> = Vec::with_capacity(command_lines.len());
     for command_line in command_lines {
         let command = parse_crane_command(command_line)?;
         commands.push(command);
@@ -96,4 +96,7 @@ mod crane_parse_test {
     }
 
 
+
+
 }
+

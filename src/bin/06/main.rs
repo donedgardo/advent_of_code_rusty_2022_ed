@@ -1,5 +1,5 @@
 use std::fs;
-use advent_of_code_rusty_2022_ed::{get_first_marker, get_message_marker};
+use advent_of_code_rusty_2022_ed::communication_device::{get_first_marker, get_message_marker};
 
 fn main() -> std::io::Result<()> {
     let input = fs::read_to_string("src/bin/06/input.txt")?;

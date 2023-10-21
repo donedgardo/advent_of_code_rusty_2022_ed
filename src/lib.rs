@@ -1,4 +1,5 @@
 use tree::Tree;
+use crate::tree::TreeNode;
 
 pub mod expedition;
 pub mod tourney;
@@ -6,14 +7,23 @@ mod rucksack;
 pub mod elves_group;
 pub mod cleaning_elves;
 pub mod crane;
-mod communication_device;
+pub mod communication_device;
 mod tree;
 
 fn parse_filesystem(input: &str) -> Option<Tree<i32>> {
     if input.is_empty() {
         return None;
     }
-    let tree = Tree::new();
+    let mut tree = Tree::new();
+    let root = tree.create_root(0);
+    for line in input.lines() {
+        if line.starts_with("$ cd") {}
+        else if line.starts_with("$ ls") {}
+        else {
+            let child = TreeNode::new(line[0..=0].parse::<i32>().unwrap_or(0));
+            root.add_child(child);
+        }
+    }
     Some(tree)
 }
 
@@ -27,17 +37,19 @@ mod filesystem_input_tests {
         assert!(parse_filesystem(input).is_none())
     }
 
-    #[ignore]
     #[test]
-    fn it_parses_sample() {
-        let input =
-            "$ cd /\
-             $ ls \
-             dir a\
-             14848514 b.txt\
-             8504156 c.dat\
-             dir d ";
-        let _ = parse_filesystem(input).unwrap();
+    fn it_interprets_root_command() {
+        let input = "$ cd /";
+        let tree = parse_filesystem(input).unwrap();
+        assert!(!tree.is_empty());
+    }
+
+    #[test]
+    fn it_interprets_ls_command() {
+        let input = "$ cd /\n$ ls\n1 a.txt";
+        let tree = parse_filesystem(input).unwrap();
+        assert!(!tree.is_empty());
+        assert_eq!(tree.read_depth_first(), &[&1, &0]);
     }
 }
 

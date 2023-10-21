@@ -1,31 +1,31 @@
-pub struct TreeNode<'a, T> {
+pub struct TreeNode<T> {
     value: T,
-    children: Vec<&'a TreeNode<'a, T>>
+    children: Vec<TreeNode<T>>
 }
 
-impl<'a, T> TreeNode<'a, T> {
+impl<T> TreeNode< T> {
     pub fn new(value: T) -> Self {
         Self {
             value,
             children: vec![],
         }
     }
-     pub fn add_child(&mut self, node: &'a TreeNode<T>) {
-         self.children.push(&node);
+     pub fn add_child(&mut self, node: TreeNode<T>) {
+         self.children.push(node);
      }
 }
 
-pub struct Tree<'a, T> {
-    root: Option<TreeNode<'a, T>>
+pub struct Tree<T> {
+    root: Option<TreeNode<T>>
 }
 
-impl<'a, T: 'a> Tree<'a, T> {
+impl<T> Tree<T> {
     pub fn new() -> Self {
         Tree {
             root: None
         }
     }
-    pub fn create_root(&mut self, value: T) -> &mut TreeNode<'a, T> {
+    pub fn create_root(&mut self, value: T) -> &mut TreeNode<T> {
         self.root = Some(TreeNode::new(value));
         self.root.as_mut().unwrap()
     }
@@ -36,7 +36,7 @@ impl<'a, T: 'a> Tree<'a, T> {
             Some(_) => { false }
         }
     }
-    pub fn read_depth_first(&'a self) -> Vec<&'a T> {
+    pub fn read_depth_first(&self) -> Vec<&T> {
         let mut output: Vec<&T> = vec![];
         match &self.root {
             None => { return output }
@@ -47,11 +47,11 @@ impl<'a, T: 'a> Tree<'a, T> {
         output
     }
 
-    fn depth_first<'b>(from: &'b TreeNode<T>, mut output: &mut Vec<&'b T>) {
+    fn depth_first<'a>(from: &'a TreeNode<T>, mut output: &mut Vec<&'a T>) {
         if from.children.is_empty() {
             output.push(&from.value);
         } else {
-            for child in from.children.clone() {
+            for child in from.children.iter() {
                 Self::depth_first(child, &mut output);
             }
             output.push(&from.value);
@@ -88,7 +88,7 @@ mod my_tree_test {
         let mut tree = Tree::new();
         let root: &mut TreeNode<i32> = tree.create_root(1);
         let child = TreeNode::new(2);
-        root.add_child( &child);
+        root.add_child( child);
         assert_eq!(root.value, 1);
         assert_eq!(root.children.len(), 1);
         assert_eq!(root.children[0].value, 2);
@@ -102,8 +102,8 @@ mod my_tree_test {
         let mut child: TreeNode<i32> = TreeNode::new(2);
         let grandchild: TreeNode<i32> = TreeNode::new(3);
 
-        child.add_child(&grandchild);
-        root.add_child(&child);
+        child.add_child(grandchild);
+        root.add_child(child);
         assert_eq!(tree.read_depth_first(), &[&3, &2, &1])
     }
 
@@ -115,9 +115,9 @@ mod my_tree_test {
         let child2: TreeNode<i32> = TreeNode::new(3);
         let grandchild: TreeNode<i32> = TreeNode::new(4);
 
-        child1.add_child(&grandchild);
-        root.add_child(&child1);
-        root.add_child(&child2);
+        child1.add_child(grandchild);
+        root.add_child(child1);
+        root.add_child(child2);
 
         assert_eq!(tree.read_depth_first(), &[&4, &2, &3, &1])
     }

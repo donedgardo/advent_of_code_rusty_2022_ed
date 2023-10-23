@@ -1,5 +1,4 @@
-use tree::Tree;
-use crate::tree::TreeNode;
+use cli::CommandLine;
 
 pub mod expedition;
 pub mod tourney;
@@ -9,22 +8,33 @@ pub mod cleaning_elves;
 pub mod crane;
 pub mod communication_device;
 mod tree;
+mod cli;
 
-fn parse_filesystem(input: &str) -> Option<Tree<i32>> {
+
+fn parse_filesystem(input: &str) -> Option<CommandLine> {
     if input.is_empty() {
         return None;
     }
-    let mut tree = Tree::new();
-    let root = tree.create_root(0);
+    let mut cli = CommandLine::new();
     for line in input.lines() {
-        if line.starts_with("$ cd") {}
-        else if line.starts_with("$ ls") {}
-        else {
-            let child = TreeNode::new(line[0..=0].parse::<i32>().unwrap_or(0));
-            root.add_child(child);
+        if line.starts_with("$ cd") {
+            let args: Vec<&str> = line.split(" ").skip(2).collect();
+            assert!(!args.is_empty());
+            cli.cd(args[0]);
+        } else if line.starts_with("$ ls") {
+            continue;
+        } else if line.starts_with("dir") {
+            let args: Vec<&str> = line.split(" ").collect();
+            assert_eq!(args.len(), 2);
+            cli.add_directory(args[1].clone());
+        } else {
+            let args: Vec<&str> = line.split(" ").collect();
+            assert_eq!(args.len(), 2);
+            cli.add_file(args[1].clone(), args[0].clone().parse::<usize>().unwrap());
         }
     }
-    Some(tree)
+    cli.cd("/");
+    Some(cli)
 }
 
 #[cfg(test)]
@@ -40,17 +50,34 @@ mod filesystem_input_tests {
     #[test]
     fn it_interprets_root_command() {
         let input = "$ cd /";
-        let tree = parse_filesystem(input).unwrap();
-        assert!(!tree.is_empty());
+        let cli = parse_filesystem(input).unwrap();
+        assert_eq!(cli.pwd(), "/");
     }
 
     #[test]
-    fn it_interprets_ls_command() {
-        let input = "$ cd /\n$ ls\n1 a.txt";
-        let tree = parse_filesystem(input).unwrap();
-        assert!(!tree.is_empty());
-        assert_eq!(tree.read_depth_first(), &[&1, &0]);
+    fn it_interprets_ls() {
+        let input = "$ cd /\n$ ls\ndir a\n23 b.txt";
+        let mut cli = parse_filesystem(input).unwrap();
+        assert_eq!(cli.ls(), "dir a\n23 b.txt");
+        cli.cd("a");
+        assert_eq!(cli.ls(), "");
     }
+
+    #[test]
+    fn it_reads_dir_size() {
+        let input = "$ cd /\n$ ls\n23 b.txt";
+        let cli = parse_filesystem(input).unwrap();
+        assert_eq!(cli.dir_size("/"), Some(23));
+    }
+
+    #[test]
+    fn it_reads_nested_dir_size() {
+        let input = "$ cd /\n$ ls\n23 b.txt\ndir c\n$ cd c\n$ ls\n123 d.txt";
+        let cli = parse_filesystem(input).unwrap();
+        assert_eq!(cli.dir_size("/"), Some(146));
+        assert_eq!(cli.dir_size("/c"), Some(123));
+    }
+
 }
 
 

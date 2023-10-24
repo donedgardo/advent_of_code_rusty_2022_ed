@@ -95,22 +95,24 @@ impl<'a> CommandLine<'a> {
         }).into()
     }
 
-    fn get_dir_path(path: &str, dir_name: &&str) -> String {
-        let new_path = match path {
-            "/" => format!("/{}", dir_name),
-            path => format!("{}/{}", path, dir_name),
-        };
-        new_path
-    }
     pub fn directories(&self) -> Vec<DirectoryNode> {
         self.directories.clone()
     }
+
     fn add_node(&mut self, node: DirectoryNode) {
         if let Some(files) = self.directory.get_mut(&self.pwd()) {
             files.push(node);
         } else {
             self.directory.insert(self.pwd(), vec![node]);
         }
+    }
+
+    fn get_dir_path(path: &str, dir_name: &&str) -> String {
+        let new_path = match path {
+            "/" => format!("/{}", dir_name),
+            path => format!("{}/{}", path, dir_name),
+        };
+        new_path
     }
 }
 

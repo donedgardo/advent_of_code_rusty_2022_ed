@@ -1,4 +1,5 @@
 use cli::CommandLine;
+use crate::cli::DirectoryNode;
 
 pub mod expedition;
 pub mod tourney;
@@ -7,9 +8,22 @@ pub mod elves_group;
 pub mod cleaning_elves;
 pub mod crane;
 pub mod communication_device;
-mod tree;
 mod cli;
 
+pub fn find_answer_1(input: &str) -> usize {
+    let cli = parse_filesystem(input).unwrap();
+    let answer: usize = cli
+        .directories()
+        .iter()
+        .map(|dir| match dir {
+            DirectoryNode::Directory(_, path) =>
+                cli.dir_size(path).unwrap_or(0),
+            _ => 0
+        })
+        .filter(|&dir_size| dir_size <= 100000)
+        .sum();
+    answer
+}
 
 pub fn parse_filesystem(input: &str) -> Option<CommandLine> {
     if input.is_empty() {
@@ -39,6 +53,8 @@ pub fn parse_filesystem(input: &str) -> Option<CommandLine> {
 
 #[cfg(test)]
 mod filesystem_input_tests {
+    use std::fs;
+    use crate::cli::DirectoryNode;
     use super::*;
 
     #[test]
@@ -82,11 +98,26 @@ mod filesystem_input_tests {
     fn it_gets_all_dir_sizes() {
         let input = "$ cd /\n$ ls\n20 b.txt\ndir c\n$ cd c\n$ ls\n120 d.txt";
         let cli = parse_filesystem(input).unwrap();
-        let dir_sizes = cli.directories().iter().map(|dir| {
-
-        });
-
+        let dir_sizes: Vec<usize> = cli
+            .directories()
+            .iter()
+            .map(|dir| match dir {
+                DirectoryNode::Directory(_, path) =>
+                    cli.dir_size(path).unwrap_or(0),
+                _ => 0
+            }).collect();
+        assert_eq!(dir_sizes.len(), 2);
+        assert_eq!(dir_sizes[0], 140);
+        assert_eq!(dir_sizes[1], 120);
     }
+
+    #[test]
+    fn it_answers_sample_input() {
+        let input = fs::read_to_string("src/bin/07/sample.txt").unwrap();
+        let answer = find_answer_1(input.as_str());
+        assert_eq!(answer, 95437);
+    }
+
 
 }
 

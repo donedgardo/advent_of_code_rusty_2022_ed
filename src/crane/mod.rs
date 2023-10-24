@@ -1,5 +1,4 @@
 use std::collections::VecDeque;
-use std::fs;
 use std::io::Error;
 use crate::crane::command::{CraneMoveCommand, parse_crane_commands};
 use crate::crane::stacks::parse_crane_stacks;
@@ -44,6 +43,7 @@ pub fn new_move_crane_commands(stacks: &mut Vec<Vec<&str>>, commands: &Vec<Crane
 #[cfg(test)]
 mod crane_sample_test {
     use super::*;
+    use std::fs;
 
     #[test]
     fn it_parses_commands_and_stacks() -> std::io::Result<()> {

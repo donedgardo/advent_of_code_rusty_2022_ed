@@ -11,7 +11,7 @@ mod tree;
 mod cli;
 
 
-fn parse_filesystem(input: &str) -> Option<CommandLine> {
+pub fn parse_filesystem(input: &str) -> Option<CommandLine> {
     if input.is_empty() {
         return None;
     }
@@ -29,7 +29,7 @@ fn parse_filesystem(input: &str) -> Option<CommandLine> {
             cli.add_directory(args[1].clone());
         } else {
             let args: Vec<&str> = line.split(" ").collect();
-            assert_eq!(args.len(), 2);
+            assert_eq!(args.len(), 2, "args should be 2 {:?}", args);
             cli.add_file(args[1].clone(), args[0].clone().parse::<usize>().unwrap());
         }
     }
@@ -76,6 +76,16 @@ mod filesystem_input_tests {
         let cli = parse_filesystem(input).unwrap();
         assert_eq!(cli.dir_size("/"), Some(146));
         assert_eq!(cli.dir_size("/c"), Some(123));
+    }
+
+    #[test]
+    fn it_gets_all_dir_sizes() {
+        let input = "$ cd /\n$ ls\n20 b.txt\ndir c\n$ cd c\n$ ls\n120 d.txt";
+        let cli = parse_filesystem(input).unwrap();
+        let dir_sizes = cli.directories().iter().map(|dir| {
+
+        });
+
     }
 
 }

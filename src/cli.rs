@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct File {
     name: String,
     size: usize
@@ -15,25 +15,30 @@ impl File {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DirectoryNode {
     File(File),
-    Directory(String, Option<usize>)
+    Directory(String, String)
 }
 
 pub struct CommandLine<'a> {
+    directories: Vec<DirectoryNode>,
     working_directory: Vec<&'a str>,
     directory: HashMap<String, Vec<DirectoryNode>>,
 }
 
 impl<'a> CommandLine<'a> {
     pub fn new() -> Self {
-        let directory = HashMap::from([
-            ("/".to_string(), Vec::new())
-        ]);
         Self {
             working_directory: Vec::new(),
-            directory,
+            directories: Vec::from([
+                DirectoryNode::Directory(
+                    "/".to_string(),
+                    "/".to_string(),
+            )]),
+            directory: HashMap::from([
+                ("/".to_string(), Vec::new())
+            ]),
         }
     }
     pub fn pwd(&self) -> String {
@@ -53,8 +58,12 @@ impl<'a> CommandLine<'a> {
         self.add_node(file);
     }
 
-    pub fn add_directory(&mut self, path: &str) {
-        let dir = DirectoryNode::Directory(path.to_string(), None);
+    pub fn add_directory(&mut self, dir_name: &str) {
+        let dir = DirectoryNode::Directory(
+            dir_name.to_string(),
+        Self::get_dir_path(&self.pwd(), &dir_name)
+        );
+        self.directories.push(dir.clone());
         self.add_node(dir);
     }
 
@@ -74,20 +83,28 @@ impl<'a> CommandLine<'a> {
         }
     }
     pub fn dir_size(&self, path: &str) -> Option<usize> {
+        // Todo memoize this expensive function
         self.directory.get(path)?.iter().fold(0, |accum, dir| {
             match dir {
                 DirectoryNode::File(file) => accum + file.size,
                 DirectoryNode::Directory(dir_name, _) => {
-                    let new_path = match path {
-                        "/" => format!("/{}", dir_name),
-                        path => format!("{}/{}", path, dir_name),
-                    };
+                    let new_path = Self::get_dir_path(path, &dir_name.as_str());
                     return accum + self.dir_size(new_path.as_str()).unwrap()
                 },
             }
         }).into()
     }
 
+    fn get_dir_path(path: &str, dir_name: &&str) -> String {
+        let new_path = match path {
+            "/" => format!("/{}", dir_name),
+            path => format!("{}/{}", path, dir_name),
+        };
+        new_path
+    }
+    pub fn directories(&self) -> Vec<DirectoryNode> {
+        self.directories.clone()
+    }
     fn add_node(&mut self, node: DirectoryNode) {
         if let Some(files) = self.directory.get_mut(&self.pwd()) {
             files.push(node);
@@ -99,7 +116,8 @@ impl<'a> CommandLine<'a> {
 
 #[cfg(test)]
 mod command_line_test {
-    use crate::cli::CommandLine;
+    use crate::cli::{CommandLine, DirectoryNode};
+    use crate::parse_filesystem;
 
     #[test]
     fn it_goes_to_root() {
@@ -179,6 +197,18 @@ mod command_line_test {
 
         assert_eq!(cli.dir_size("/c/e"), Some(30));
         assert_eq!(cli.dir_size("/"), Some(34));
+    }
+
+    #[test]
+    fn it_gets_directories() {
+        let mut cli = parse_filesystem("$ cd /").unwrap();
+        let dirs = cli.directories();
+        assert_eq!(dirs.len(), 1);
+        assert_eq!(dirs[0], DirectoryNode::Directory("/".to_string(), "/".to_string()));
+        cli.add_directory("a");
+        let dirs = cli.directories();
+        assert_eq!(dirs.len(), 2);
+        assert_eq!(dirs[1], DirectoryNode::Directory("a".to_string(), "/a".to_string()));
     }
 
 }
